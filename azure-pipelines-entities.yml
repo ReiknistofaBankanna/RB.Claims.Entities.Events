@@ -1,0 +1,27 @@
+name: $(majorMinorVersion).$(semanticVersion) # $(rev:r) # NOTE: rev resets when the default retention period expires
+
+trigger:
+- master
+
+# pipeline variables
+variables:
+  majorMinorVersion: 3.0
+  # semanticVersion counter is automatically incremented by one in each execution of pipeline
+  # second parameter is seed value to reset to every time the referenced majorMinorVersion is changed
+  semanticVersion: $[counter(variables['majorMinorVersion'], 0)]
+
+resources:
+  repositories:
+    - repository: pipelines
+      type: git
+      name: Templates/Pipelines
+
+stages:
+  - stage: Build
+    jobs:
+    - template: Build\CreateCoreNugetPackage.yaml@pipelines
+      parameters:
+        solutionShortName: 'RB_Claims_Entities_Events'
+        solutionName: RB.Claims.Entities.Events
+        packagesToPack: RB.Claims.Entities.Events
+
